@@ -1,7 +1,8 @@
-﻿using System.Windows;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using CommunityHub.Application.Database.Repositories;
 
-namespace CommunityHub.Ui.Views;
+namespace CommunityHub.Uix.Views;
 
 public partial class LogInForm : Window
 {
@@ -13,10 +14,10 @@ public partial class LogInForm : Window
         _userRepository = new UserDbRepository();
     }
 
-    private void LoginButton_Click(object sender, RoutedEventArgs e)
+    private void LoginButton_Click(object? sender, RoutedEventArgs e)
     {
-        string username = UsernameTextBox.Text;
-        string password = PasswordBox.Password;
+        string username = UsernameTextBox.Text ?? "";
+        string password = PasswordTextBox.Text ?? "";
 
         long? userId = _userRepository.GetIdByCredentials(username, password);
 
@@ -29,7 +30,7 @@ public partial class LogInForm : Window
         else
         {
             ErrorMessageTextBlock.Text = "Neispravno korisničko ime ili lozinka.";
-            ErrorMessageTextBlock.Visibility = Visibility.Visible;
+            ErrorMessageTextBlock.IsVisible = true;
         }
     }
 }

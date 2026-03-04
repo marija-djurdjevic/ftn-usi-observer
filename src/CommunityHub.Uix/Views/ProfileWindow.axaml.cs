@@ -1,17 +1,18 @@
 using System.Collections.ObjectModel;
-using System.Windows;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using CommunityHub.Application.Database.Repositories;
 using CommunityHub.Application.Domain;
 
-namespace CommunityHub.Ui.Views;
+namespace CommunityHub.Uix.Views;
 
 public partial class ProfileWindow : Window
 {
     private readonly UserDbRepository _userRepository;
 
     private readonly long _userId;
-    private User _user;
-    private ObservableCollection<Post> _posts;
+    private User _user = null!;
+    private ObservableCollection<Post> _posts = null!;
 
     public ProfileWindow(long userId)
     {
@@ -26,8 +27,8 @@ public partial class ProfileWindow : Window
         User? user = _userRepository.GetWithPosts(_userId);
         if (user == null)
         {
-            MessageBox.Show("Korisnik nije pronađen.", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
-            Close();
+            ErrorMessageText.Text = "Korisnik nije pronađen.";
+            ErrorOverlay.IsVisible = true;
             return;
         }
 
@@ -38,27 +39,34 @@ public partial class ProfileWindow : Window
         PostsItemsControl.ItemsSource = _posts;
     }
 
-    private void NewPostButton_Click(object sender, RoutedEventArgs e)
+    private async void NewPostButton_Click(object? sender, RoutedEventArgs e)
     {
         CreatePostWindow createPostWindow = new CreatePostWindow(_userId);
-        if (createPostWindow.ShowDialog() == true && createPostWindow.CreatedPost != null)
+        bool result = await createPostWindow.ShowDialog<bool>(this);
+        if (result && createPostWindow.CreatedPost != null)
         {
             _user.AddPost(createPostWindow.CreatedPost);
             _posts.Add(createPostWindow.CreatedPost);
         }
     }
 
-    private void HomeButton_Click(object sender, RoutedEventArgs e)
+    private void HomeButton_Click(object? sender, RoutedEventArgs e)
     {
         HomeWindow homeWindow = new HomeWindow(_userId);
         homeWindow.Show();
         this.Close();
     }
 
-    private void LogoutButton_Click(object sender, RoutedEventArgs e)
+    private void LogoutButton_Click(object? sender, RoutedEventArgs e)
     {
         LogInForm loginForm = new LogInForm();
         loginForm.Show();
+        this.Close();
+    }
+
+    private void ErrorOkButton_Click(object? sender, RoutedEventArgs e)
+    {
+        ErrorOverlay.IsVisible = false;
         this.Close();
     }
 }

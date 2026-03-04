@@ -1,4 +1,4 @@
-Ovaj repozitorijum sadrži početni projekat za izradu desktop aplikacije sa pristupom bazi podataka. Projekat koristi .NET 10 i WPF (Windows Presentation Foundation) za korisnički interfejs i PostgreSQL za skladištenje podataka.
+Ovaj repozitorijum sadrži početni projekat za izradu cross-platform desktop aplikacije sa pristupom bazi podataka. Projekat koristi .NET 10 i Avalonia UI za korisnički interfejs i PostgreSQL za skladištenje podataka.
 
 ## Struktura Projekta
 
@@ -8,7 +8,7 @@ Projekat je organizovan u dva glavna dela:
 CommunityHub/
 ├── src/
 │   ├── CommunityHub.Application/ # Poslovna logika i pristup bazi
-│   └── CommunityHub.Ui/          # Korisnički interfejs (WPF)
+│   └── CommunityHub.Uix/         # Korisnički interfejs (Avalonia UI)
 └── CommunityHub.slnx
 ```
 
@@ -57,32 +57,44 @@ Model podataka i poslovne logike koja radi nad tim podacima.
 #### appsettings.json
 Konfiguracioni fajl sa podacima za pristup bazi.
 
-### CommunityHub.Ui
+### CommunityHub.Uix
 
-WPF projekat koji sadrži sve prozore i korisničku interakciju.
+Avalonia UI projekat koji sadrži sve prozore i korisničku interakciju. Koristi Avalonia 11 sa FluentTheme temom i radi na Windows, macOS i Linux operativnim sistemima.
 
-#### App.xaml / App.xaml.cs
+#### Program.cs
+- Eksplicitna `Main` metoda koja pokreće Avalonia aplikaciju
+- Konfiguriše `AppBuilder` sa platform detekcijom
+
+#### App.axaml / App.axaml.cs
 - Ulazna tačka aplikacije
-- `StartupUri="/Views/LogInForm.xaml"` - Prvi prozor koji se otvara
+- `OnFrameworkInitializationCompleted` postavlja `LogInForm` kao prvi prozor
+- **Obratiti pažnju:** Avalonia nema `StartupUri` — prozor se kreira programski u code-behind
 
 #### Views/
-- **LogInForm.xaml** - Forma za prijavu korisnika
-- **LogInForm.xaml.cs** - Code-behind logika
+- **LogInForm.axaml** - Forma za prijavu korisnika
+- **LogInForm.axaml.cs** - Code-behind logika
   - Poziva `UserDbRepository.GetIdByCredentials()` pri kliku na dugme
   - Ako korisnik postoji, otvara `HomeWindow` i zatvara login formu
   - Ako ne postoji, prikazuje poruku o grešci
+  - **Obratiti pažnju:** Avalonia nema `PasswordBox` — koristi se `TextBox` sa `PasswordChar="*"`
 
-- **HomeWindow.xaml** - Početna stranica nakon prijave
-- **HomeWindow.xaml.cs** - Code-behind logika
+- **HomeWindow.axaml** - Početna stranica nakon prijave
+- **HomeWindow.axaml.cs** - Code-behind logika
   - **Obratiti pažnju:** Prima `userId` u konstruktoru
   - Dugme "Profil" otvara ProfileWindow
   - Dugme "Odjavi se" vraća na LogInForm
 
-- **ProfileWindow.xaml** - Profil korisnika sa objavama
+- **ProfileWindow.axaml** - Profil korisnika sa objavama
   - **Obratiti pažnju:** Koristi ItemsControl sa DataTemplate za prikaz objava
-- **ProfileWindow.xaml.cs** - Code-behind logika
+- **ProfileWindow.axaml.cs** - Code-behind logika
   - Poziva `UserDbRepository.GetWithPosts()` da učita podatke
   - Povezuje Posts listu sa ItemsControl kroz ItemsSource
+  - **Obratiti pažnju:** `ShowDialog<bool>(owner)` je asinhrona metoda (za razliku od sinhronog WPF `ShowDialog()`)
+
+- **CreatePostWindow.axaml** - Dijalog za kreiranje nove objave
+- **CreatePostWindow.axaml.cs** - Code-behind logika
+  - **Obratiti pažnju:** Koristi `GetObservable(TextBox.TextProperty).Subscribe()` umesto WPF `TextChanged` eventa
+  - **Obratiti pažnju:** `Close(true/false)` zamenjuje WPF `DialogResult` properti
 
 ## Pokretanje Projekta
 
@@ -102,8 +114,8 @@ Uz PostgresSQL bazu podataka dobijaš i **pgAdmin** aplikaciju kroz koju možeš
 
 ### Pokretanje Aplikacije
 
-1. Otvorite `CommunityHub.slnx` u Visual Studio
-2. Postavite `CommunityHub.Ui` kao StartUp project
+1. Otvorite `CommunityHub.slnx` u Visual Studio ili JetBrains Rider
+2. Postavite `CommunityHub.Uix` kao StartUp project
 3. Pokrenite aplikaciju (F5)
 4. Prijavite se sa nekim od korisnika (npr. "ana", "ana123")
 
