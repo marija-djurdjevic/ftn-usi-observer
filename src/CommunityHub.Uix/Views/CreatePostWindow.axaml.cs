@@ -11,13 +11,11 @@ public partial class CreatePostWindow : Window
     private readonly long _userId;
     private readonly PostDbRepository _postRepository;
 
-    public Post? CreatedPost { get; private set; }
-
-    public CreatePostWindow(long userId)
+    public CreatePostWindow(long userId, PostDbRepository postRepository)
     {
         InitializeComponent();
         _userId = userId;
-        _postRepository = new PostDbRepository();
+        _postRepository = postRepository;
 
         TitleTextBox.GetObservable(TextBox.TextProperty).Subscribe(new TextObserver(this));
     }
@@ -39,13 +37,12 @@ public partial class CreatePostWindow : Window
     private void SaveButton_Click(object? sender, RoutedEventArgs e)
     {
         Post post = new Post(TitleTextBox.Text!, ContentTextBox.Text ?? "");
-        CreatedPost = _postRepository.Create(post, _userId);
-
-        Close(true);
+        _postRepository.Create(post, _userId);
+        Close();
     }
 
     private void CancelButton_Click(object? sender, RoutedEventArgs e)
     {
-        Close(false);
+        Close();
     }
 }

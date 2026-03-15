@@ -1,10 +1,18 @@
 using System.Data;
 using CommunityHub.Application.Domain;
+using CommunityHub.Application.Observer;
 
 namespace CommunityHub.Application.Database.Repositories;
 
 public class PostDbRepository
 {
+    public Subject PostSubject { get; }
+
+    public PostDbRepository()
+    {
+        PostSubject = new Subject();
+    }
+
     public Post Create(Post post, long userId)
     {
         using IDbConnection connection = PostgresConnection.CreateConnection();
@@ -35,9 +43,12 @@ public class PostDbRepository
         userIdParam.Value = userId;
         command.Parameters.Add(userIdParam);
 
-        // ExecuteScalar vraća prvu kolonu prvog reda (id u ovom slučaju)
         long id = Convert.ToInt64(command.ExecuteScalar());
 
-        return new Post(id, post.Title, post.Content, post.CreatedAt);
+        Post createdPost = new Post(id, post.Title, post.Content, post.CreatedAt);
+
+        PostSubject.NotifyObservers();
+
+        return createdPost;
     }
 }
