@@ -16,19 +16,12 @@ public partial class CreatePostWindow : Window
         InitializeComponent();
         _userId = userId;
         _postRepository = postRepository;
-
-        TitleTextBox.GetObservable(TextBox.TextProperty).Subscribe(new TextObserver(this));
     }
 
-    private class TextObserver(CreatePostWindow owner) : IObserver<string?>
+    private void OnTitleTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        public void OnNext(string? value) => owner.OnTitleTextChanged(value);
-        public void OnError(Exception error) { }
-        public void OnCompleted() { }
-    }
+        string? text = TitleTextBox.Text;
 
-    private void OnTitleTextChanged(string? text)
-    {
         bool isValid = (text?.Length ?? 0) >= 3;
         SaveButton.IsEnabled = isValid;
         ValidationErrorTextBlock.IsVisible = (text?.Length ?? 0) > 0 && !isValid;
