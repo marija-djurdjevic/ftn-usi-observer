@@ -4,14 +4,9 @@ using CommunityHub.Application.Observer;
 
 namespace CommunityHub.Application.Database.Repositories;
 
-public class PostDbRepository
+public class PostDbRepository : Subject
 {
-    public Subject PostSubject { get; }
-
-    public PostDbRepository()
-    {
-        PostSubject = new Subject();
-    }
+    public PostDbRepository() {}
 
     public Post Create(Post post, long userId)
     {
@@ -47,7 +42,7 @@ public class PostDbRepository
 
         Post createdPost = new Post(id, post.Title, post.Content, post.CreatedAt);
 
-        PostSubject.NotifyObservers();
+        NotifyObservers();
 
         return createdPost;
     }

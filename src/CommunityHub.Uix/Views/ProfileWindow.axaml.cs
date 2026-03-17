@@ -26,7 +26,7 @@ public partial class ProfileWindow : Window, IObserver
         Posts = new ObservableCollection<Post>();
         PostsItemsControl.ItemsSource = Posts;
 
-        _postRepository.PostSubject.Subscribe(this);
+        _postRepository.Subscribe(this);
 
         LoadUserInfo();
         Update();
@@ -88,7 +88,7 @@ public partial class ProfileWindow : Window, IObserver
 
     protected override void OnClosed(EventArgs e)
     {
-        _postRepository.PostSubject.Unsubscribe(this);
+        _postRepository.Unsubscribe(this);
         base.OnClosed(e);
     }
 }
